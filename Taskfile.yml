@@ -1,0 +1,135 @@
+version: "3"
+
+vars:
+  BIN_NAME: ccm
+  IMAGE_NAME: ccm:latest
+
+tasks:
+  build:
+    desc: Build the CCM binary
+    cmds:
+      - go build -o bin/{{.BIN_NAME}} ./cmd/ccm/
+
+  lint:
+    desc: Run linters (requires golangci-lint)
+    cmds:
+      - golangci-lint run
+
+  docker-build:
+    desc: Build Docker image
+    cmds:
+      - docker build -t {{.IMAGE_NAME}} .
+
+  k3s-install:
+    desc: Install k3s with external cloud controller
+    cmds:
+      - |
+        # Flags: disable in-tree cloud controller, tell kubelet to use external CCM, allow kubeconfig for all users
+        K3S_FLAGS="--disable-cloud-controller --kubelet-arg=cloud-provider=external --write-kubeconfig-mode 644"
+
+        if command -v k3s &> /dev/null; then
+          echo "Uninstalling existing k3s..."
+          if [ -f /usr/local/bin/k3s-uninstall.sh ]; then
+            sudo /usr/local/bin/k3s-uninstall.sh
+          elif [ -f /usr/bin/k3s-uninstall.sh ]; then
+            sudo /usr/bin/k3s-uninstall.sh
+          fi
+        fi
+
+        echo "Installing k3s with external cloud provider..."
+        curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="$K3S_FLAGS" sh -
+
+  k3s-uninstall:
+    desc: Uninstall k3s
+    cmds:
+      - |
+        if [ -f /usr/local/bin/k3s-uninstall.sh ]; then
+          sudo /usr/local/bin/k3s-uninstall.sh
+        elif [ -f /usr/bin/k3s-uninstall.sh ]; then
+          sudo /usr/bin/k3s-uninstall.sh
+        else
+          echo "k3s uninstall script not found"
+        fi
+
+  k3s-start:
+    desc: Restart k3s service
+    cmds:
+      - sudo systemctl restart k3s
+
+  k3s-stop:
+    desc: Stop k3s service
+    cmds:
+      - sudo systemctl stop k3s
+
+  k3s-status:
+    desc: Check k3s status
+    cmds:
+      - sudo systemctl status k3s --no-pager
+
+  k3s-logs:
+    desc: View k3s logs
+    cmds:
+      - sudo journalctl -u k3s -f --no-pager
+
+  k3s-load:
+    desc: Load Docker image into k3s
+    cmds:
+      - |
+        if [ -f {{.IMAGE_NAME}}.tar ]; then
+          sudo ctr images import {{.IMAGE_NAME}}.tar
+        else
+          docker save {{.IMAGE_NAME}} | sudo ctr images import -
+        fi
+
+  helm-template:
+    desc: Render Helm templates (dry-run)
+    cmds:
+      - helm template ./helm/ccm --namespace kube-system
+
+  apply:
+    desc: Install CCM using Helm
+    cmds:
+      - helm upgrade --install ccm ./helm/ccm --namespace kube-system --create-namespace
+
+  delete:
+    desc: Uninstall CCM using Helm
+    cmds:
+      - helm uninstall ccm --namespace kube-system || true
+
+  dev:
+    desc: Full development cycle - build, docker, start k3s, apply
+    cmds:
+      - task: build
+      - task: docker-build
+      - task: k3s-start
+      - task: k3s-load
+      - task: apply
+
+  dev-install:
+    desc: Full setup - install k3s, build, docker, load, apply
+    cmds:
+      - task: build
+      - task: docker-build
+      - task: k3s-install
+      - task: k3s-load
+      - task: apply
+
+  logs:
+    desc: View CCM logs
+    cmds:
+      - kubectl logs -n kube-system -l app.kubernetes.io/name=ccm -f
+
+  status:
+    desc: Check CCM pod status
+    cmds:
+      - kubectl get pods -n kube-system -l app.kubernetes.io/name=ccm
+
+  describe:
+    desc: Describe CCM pod
+    cmds:
+      - kubectl describe pods -n kube-system -l app.kubernetes.io/name=ccm
+
+  restart:
+    desc: Restart CCM pods
+    cmds:
+      - kubectl rollout restart daemonset/ccm -n kube-system

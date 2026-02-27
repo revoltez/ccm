@@ -1,0 +1,13 @@
+apiVersion: v2
+name: ccm
+description: Cloud Controller Manager for Kubernetes
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - kubernetes
+  - cloud-controller-manager
+  - ccm
+maintainers:
+  - name: CCM
+    email: ccm@example.com
