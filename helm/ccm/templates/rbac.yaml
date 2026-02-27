@@ -1,18 +1,13 @@
-{{- if .Values.rbac.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ include "ccm.serviceAccountName" . }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "ccm.labels" . | nindent 4 }}
+  name: cloud-controller-manager
+  namespace: kube-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: {{ include "ccm.fullname" . }}
-  labels:
-    {{- include "ccm.labels" . | nindent 4 }}
+  name: ccm
 rules:
   - apiGroups: ["*"]
     resources: ["*"]
@@ -23,15 +18,13 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: {{ include "ccm.fullname" . }}
-  labels:
-    {{- include "ccm.labels" . | nindent 4 }}
+  name: ccm
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: {{ include "ccm.fullname" . }}
+  name: ccm
 subjects:
   - kind: ServiceAccount
-    name: {{ include "ccm.serviceAccountName" . }}
-    namespace: {{ .Release.Namespace }}
-{{- end }}
+    name: cloud-controller-manager
+    namespace: default
+

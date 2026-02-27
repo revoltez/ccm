@@ -76,20 +76,15 @@ tasks:
     cmds:
       - |
         if [ -f {{.IMAGE_NAME}}.tar ]; then
-          sudo ctr images import {{.IMAGE_NAME}}.tar
+          sudo k3s ctr images import {{.IMAGE_NAME}}.tar
         else
-          docker save {{.IMAGE_NAME}} | sudo ctr images import -
+          docker save {{.IMAGE_NAME}} | sudo k3s ctr images import -
         fi
-
-  helm-template:
-    desc: Render Helm templates (dry-run)
-    cmds:
-      - helm template ./helm/ccm --namespace kube-system
 
   apply:
     desc: Install CCM using Helm
     cmds:
-      - helm upgrade --install ccm ./helm/ccm --namespace kube-system --create-namespace
+      - helm upgrade --install ccm ./helm/ccm --namespace kube-system
 
   delete:
     desc: Uninstall CCM using Helm
