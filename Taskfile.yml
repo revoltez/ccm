@@ -84,7 +84,7 @@ tasks:
   apply:
     desc: Install CCM using Helm
     cmds:
-      - helm upgrade --install ccm ./helm/ccm --namespace kube-system
+      - helm upgrade --install ccm ./helm/ccm --namespace kube-system --kubeconfig /etc/rancher/k3s/k3s.yaml
 
   delete:
     desc: Uninstall CCM using Helm
@@ -96,7 +96,6 @@ tasks:
     cmds:
       - task: build
       - task: docker-build
-      - task: k3s-start
       - task: k3s-load
       - task: apply
 

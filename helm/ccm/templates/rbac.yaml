@@ -26,5 +26,5 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: cloud-controller-manager
-    namespace: default
+    namespace: kube-system
 

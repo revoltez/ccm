@@ -27,7 +27,8 @@ type CCMConfig struct {
 
 func NewCloud(config io.Reader) (cloudprovider.Interface, error) {
 	if config == nil {
-		return nil, fmt.Errorf("config is required")
+		klog.InfoS("No config provided, initializing CCM with defaults")
+		return &CCM{cfg: nil}, nil
 	}
 
 	cfg, err := readConfig(config)

@@ -13,6 +13,9 @@ spec:
       labels:
         app.kubernetes.io/name: ccm
     spec:
+			# TODO for some reason the CCM cannot connect to the kube api server without being in the same network
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: cloud-controller-manager
       automountServiceAccountToken: true
       tolerations:
@@ -33,7 +36,7 @@ spec:
           command:
             - /ccm
           args:
-            - --cloud-provider=external
-            - --leader-elect=true
+            - --cloud-provider=salih-ccm
+            - --leader-elect=false
             - --use-service-account-credentials=true
             - --cluster-name=ccm
