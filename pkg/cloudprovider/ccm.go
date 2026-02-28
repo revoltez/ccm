@@ -9,8 +9,6 @@ import (
 	"k8s.io/klog/v2"
 )
 
-const ProviderName = "salih-ccm"
-
 var _ cloudprovider.Interface = (*CCM)(nil)
 
 func init() {
@@ -18,7 +16,8 @@ func init() {
 }
 
 type CCM struct {
-	cfg *CCMConfig
+	cfg       *CCMConfig
+	instances *Instances
 }
 
 type CCMConfig struct {
@@ -26,9 +25,13 @@ type CCMConfig struct {
 }
 
 func NewCloud(config io.Reader) (cloudprovider.Interface, error) {
+	ccm := &CCM{
+		instances: NewInstances(),
+	}
+
 	if config == nil {
 		klog.InfoS("No config provided, initializing CCM with defaults")
-		return &CCM{cfg: nil}, nil
+		return ccm, nil
 	}
 
 	cfg, err := readConfig(config)
@@ -36,9 +39,11 @@ func NewCloud(config io.Reader) (cloudprovider.Interface, error) {
 		return nil, fmt.Errorf("failed to read config: %w", err)
 	}
 
+	ccm.cfg = cfg
+
 	klog.InfoS("Initializing CCM cloud provider", "config", cfg.ClientConfig)
 
-	return &CCM{cfg: cfg}, nil
+	return ccm, nil
 }
 
 func (c *CCM) Initialize(_ cloudprovider.ControllerClientBuilder, _ <-chan struct{}) {
@@ -54,7 +59,7 @@ func (c *CCM) Instances() (cloudprovider.Instances, bool) {
 }
 
 func (c *CCM) InstancesV2() (cloudprovider.InstancesV2, bool) {
-	return nil, false
+	return c.instances, true
 }
 
 func (c *CCM) Zones() (cloudprovider.Zones, bool) {

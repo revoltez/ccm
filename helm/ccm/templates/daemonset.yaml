@@ -13,8 +13,7 @@ spec:
       labels:
         app.kubernetes.io/name: ccm
     spec:
-			# TODO for some reason the CCM cannot connect to the kube api server without being in the same network
-      hostNetwork: true
+      hostNetwork: true # TODO for some reason the CCM cannot connect to the kube api server without being in the same network
       dnsPolicy: ClusterFirstWithHostNet
       serviceAccountName: cloud-controller-manager
       automountServiceAccountToken: true
