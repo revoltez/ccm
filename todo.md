@@ -13,22 +13,12 @@
 
 ## Phase 2: Cloud Provider Interface Implementation
 
+### Bare-metal
+
+- [x] Implement InstancesV2 interface (node registration, metadata, taint removal)
+- [x] Document the methods for future implementations
+- [x] Add environment variable support for provider configuration
+
 - [ ] Implement LoadBalancer interface (for Service type LoadBalancer)
-- [ ] Implement Instances interface (for node management)
-- [ ] Implement InstancesV2 interface (optimized instance API)
-- [ ] Implement Zones interface (for zone/region info)
 - [ ] Implement Routes interface (for cluster networking)
 - [ ] Implement Clusters interface
-
-## Phase 3: Controller Implementation
-
-- [ ] Implement Node Controller logic
-- [ ] Implement Service Controller logic (LoadBalancer)
-- [ ] Implement Route Controller logic
-
-## Phase 4: Production Readiness
-
-- [ ] Add proper logging
-- [ ] Add metrics
-- [ ] Implement graceful shutdown
-- [ ] Add health checks

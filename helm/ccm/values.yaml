@@ -13,6 +13,12 @@ rbac:
   serviceAccount:
     name: cloud-controller-manager
 
+config:
+  providerName: "salih-ccm"
+  providerIDPrefix: "salih-ccm://"
+  zone: "local-zone"
+  region: "local-region"
+
 pod:
   annotations: {}
 

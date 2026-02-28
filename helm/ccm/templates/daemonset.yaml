@@ -39,3 +39,6 @@ spec:
             - --leader-elect=false
             - --use-service-account-credentials=true
             - --cluster-name=ccm
+          envFrom:
+            - configMapRef:
+                name: ccm-config
