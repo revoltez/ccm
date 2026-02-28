@@ -81,10 +81,26 @@ tasks:
           docker save {{.IMAGE_NAME}} | sudo k3s ctr images import -
         fi
 
+  kubeconfig:
+    desc: Merge k3s kubeconfig into ~/.kube/config
+    cmds:
+      - mkdir -p ~/.kube
+      - cp /etc/rancher/k3s/k3s.yaml ~/.kube/k3s.yaml
+      - |
+        if [ -f ~/.kube/config ]; then
+          export KUBECONFIG=~/.kube/config:~/.kube/k3s.yaml
+        else
+          export KUBECONFIG=~/.kube/k3s.yaml
+        fi
+        kubectl config view --flatten > ~/.kube/config.tmp
+        mv ~/.kube/config.tmp ~/.kube/config
+        chmod 600 ~/.kube/config
+        echo "Kubeconfig merged to ~/.kube/config"
+
   apply:
     desc: Install CCM using Helm
     cmds:
-      - helm upgrade --install ccm ./helm/ccm --namespace kube-system --kubeconfig /etc/rancher/k3s/k3s.yaml
+      - helm upgrade --install ccm ./helm/ccm --namespace kube-system --kubeconfig /etc/rancher/k3s/k3s.yaml && kubectl delete pods -n kube-system -l app.kubernetes.io/name=ccm
 
   delete:
     desc: Uninstall CCM using Helm
