@@ -7,5 +7,5 @@ metadata:
 data:
   CCM_PROVIDER_NAME: {{ .Values.config.providerName | default "salih-ccm" | quote }}
   CCM_PROVIDER_ID_PREFIX: {{ .Values.config.providerIDPrefix | default "salih-ccm://" | quote }}
-  CCM_ZONE: {{ .Values.config.zone | default "local-zone" | quote }}
-  CCM_REGION: {{ .Values.config.region | default "local-region" | quote }}
+  CCM_ZONE: {{ .Values.config.zone | default "ngaous" | quote }}
+  CCM_REGION: {{ .Values.config.region | default "batna" | quote }}
