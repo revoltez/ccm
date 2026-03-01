@@ -6,10 +6,8 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"strings"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	cloudprovider "k8s.io/cloud-provider"
 )
 
@@ -174,20 +172,4 @@ func getProviderIDPrefix() string {
 		return prefix
 	}
 	return ProviderName + "://"
-}
-
-// ProviderIDToNodeName converts a provider ID back to a node name.
-// Useful for reverse lookups when processing node events.
-func ProviderIDToNodeName(providerID string) (types.NodeName, error) {
-	prefix := getProviderIDPrefix()
-	if !strings.HasPrefix(providerID, prefix) {
-		return "", fmt.Errorf("invalid provider ID format: %s (expected prefix: %s)", providerID, prefix)
-	}
-	nodeName := strings.TrimPrefix(providerID, prefix)
-	return types.NodeName(nodeName), nil
-}
-
-// NodeNameToProviderID converts a node name to a provider ID format.
-func NodeNameToProviderID(nodeName types.NodeName) string {
-	return getProviderIDPrefix() + string(nodeName)
 }
