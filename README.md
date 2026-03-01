@@ -52,12 +52,7 @@ kubectl get nodes
 
 You should see the node transition from `NotReady` (due to the taint) to `Ready`.
 
-The CCM achieves this by implementing the `InstancesV2` interface. When a node joins the cluster:
-
-1. kubelet registers the node with the `uninitialized` taint
-2. The CCM watches for node events through the Kubernetes API server
-3. The CCM returns node information (providerID, addresses, zone, region) via its `InstanceMetadata()` implementation
-4. The node's taint is removed and it becomes Ready
+The CCM achieves this by implementing the `InstancesV2` interface. When a node joins the cluster, the CCM watches for node events through the Kubernetes API server and provides node information (providerID, addresses, zone, region) via its `InstanceMetadata()` implementation.
 
 ## Configuration
 
@@ -95,26 +90,6 @@ When `InstanceMetadata` is called, it returns an `InstanceMetadata` struct conta
 - **Zone** - Availability zone (set as node label)
 - **Region** - Region (set as node label)
 - **AdditionalLabels** - Any additional labels
-
-### Node Taint Removal Flow
-
-```mermaid
-sequenceDiagram
-    participant K as kubelet
-    participant N as Node
-    participant API as Kubernetes API Server
-    participant CCM as CCM (this project)
-
-    K->>API: Register node with taint<br/>uninitialized
-    API->>N: Node NotReady
-
-    Note over API,CCM: CCM watches for node events<br/>through API server
-
-    API->>CCM: InstanceMetadata(node)
-    CCM-->>API: Returns: providerID,<br/>addresses, zone, region
-    API->>N: Remove taint<br/>Apply labels
-    N-->>K: Node Ready
-```
 
 ### Why CCM Can Be Scheduled
 
