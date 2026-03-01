@@ -55,9 +55,9 @@ You should see the node transition from `NotReady` (due to the taint) to `Ready`
 The CCM achieves this by implementing the `InstancesV2` interface. When a node joins the cluster:
 
 1. kubelet registers the node with the `uninitialized` taint
-2. kube-controller-manager calls the CCM's `InstanceMetadata()` method
-3. The CCM returns node information (providerID, addresses, zone, region)
-4. kube-controller-manager removes the taint and marks the node as Ready
+2. The CCM watches for node events through the Kubernetes API server
+3. The CCM returns node information (providerID, addresses, zone, region) via its `InstanceMetadata()` implementation
+4. The node's taint is removed and it becomes Ready
 
 ## Configuration
 
@@ -102,16 +102,17 @@ When `InstanceMetadata` is called, it returns an `InstanceMetadata` struct conta
 sequenceDiagram
     participant K as kubelet
     participant N as Node
-    participant KCM as kube-controller-manager
+    participant API as Kubernetes API Server
     participant CCM as CCM (this project)
 
-    K->>N: Register node with taint<br/>uninitialized
-    N-->>K: Node NotReady
+    K->>API: Register node with taint<br/>uninitialized
+    API->>N: Node NotReady
 
-    KCM->>CCM: InstanceMetadata(node)
-    CCM-->>KCM: Returns: providerID,<br/>addresses, zone, region
+    Note over API,CCM: CCM watches for node events<br/>through API server
 
-    KCM->>N: Remove taint<br/>Apply labels
+    API->>CCM: InstanceMetadata(node)
+    CCM-->>API: Returns: providerID,<br/>addresses, zone, region
+    API->>N: Remove taint<br/>Apply labels
     N-->>K: Node Ready
 ```
 
@@ -147,5 +148,3 @@ To extend this CCM for a real cloud provider (AWS, GCP, Azure, etc.), you would:
    - `LoadBalancer` - For Service type=LoadBalancer
    - `Routes` - For cluster networking
    - `Clusters` - For multi-cluster support
-
-The key insight is that you don't need to write any controller logic - Kubernetes already has controllers (kube-controller-manager) that call your cloud provider interface implementation. Your job is just to implement the interface!
