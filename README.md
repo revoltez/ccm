@@ -42,8 +42,6 @@ This runs a sequence of tasks:
 3. `task k3s-load` - Loads the Docker image into k3s
 4. `task apply` - Deploys the CCM using Helm
 
-**What happens:** A DaemonSet is created in the `kube-system` namespace running the CCM. The CCM is able to run on the node despite the taint because the DaemonSet includes a toleration for `node.cloudprovider.kubernetes.io/uninitialized`. This allows the CCM pod to be scheduled before the node is ready, creating a chicken-and-egg problem that the CCM solves by providing node information.
-
 ### Step 3: Verify Node is Ready
 
 ```bash
